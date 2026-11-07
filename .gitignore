@@ -1,0 +1,6 @@
+.env
+docker/create-db-user.sql
+downloads/
+dev/
+.DS_Store
+.claude/
