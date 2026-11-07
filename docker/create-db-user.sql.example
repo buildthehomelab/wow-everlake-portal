@@ -1,0 +1,10 @@
+-- The portal's MySQL user: makes and checks accounts in the auth database, nothing else.
+-- Set a password, then run as root:
+--   docker compose -p everlake exec -T mysql mysql -uroot -p < docker/create-db-user.sql
+CREATE USER IF NOT EXISTS 'everlake_portal'@'%' IDENTIFIED BY 'CHANGE_ME';
+GRANT SELECT, INSERT ON auth.battlenet_accounts     TO 'everlake_portal'@'%';
+GRANT SELECT, INSERT ON auth.account                TO 'everlake_portal'@'%';
+GRANT INSERT         ON auth.realmcharacters        TO 'everlake_portal'@'%';
+GRANT SELECT         ON auth.realmlist              TO 'everlake_portal'@'%';
+GRANT SELECT         ON auth.battlenet_account_bans TO 'everlake_portal'@'%';
+FLUSH PRIVILEGES;

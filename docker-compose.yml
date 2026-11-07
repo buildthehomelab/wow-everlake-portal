@@ -1,0 +1,41 @@
+name: everlake-portal
+
+services:
+  portal:
+    build: .
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${TRAEFIK_NETWORK:?set TRAEFIK_NETWORK in .env}"
+      - "traefik.http.routers.everlake-portal.rule=Host(`${PORTAL_HOST:?set PORTAL_HOST in .env}`)"
+      - "traefik.http.routers.everlake-portal.entrypoints=websecure"
+      - "traefik.http.routers.everlake-portal.tls=true"
+      - "traefik.http.routers.everlake-portal.tls.certresolver=letsencrypt"
+      - "traefik.http.services.everlake-portal.loadbalancer.server.port=80"
+    environment:
+      SITE_NAME: ${SITE_NAME:-Everlake}
+      AUTH_DSN: mysql:host=${AUTH_DB_HOST:-mysql};port=3306;dbname=${AUTH_DB_NAME:-auth};charset=utf8mb4
+      AUTH_USER: ${AUTH_USER:-everlake_portal}
+      AUTH_PASSWORD: ${AUTH_PASSWORD:?set AUTH_PASSWORD in .env}
+      INVITES_PER_ACCOUNT: ${INVITES_PER_ACCOUNT:-5}
+      DOWNLOAD_WINDOWS: ${DOWNLOAD_WINDOWS:-Everlake-Setup.exe}
+      DOWNLOAD_MACOS: ${DOWNLOAD_MACOS:-Everlake.dmg}
+      CLIENT_IP_HEADER: ${CLIENT_IP_HEADER:-X-Forwarded-For}
+      PORTAL_DATA_DIR: /data
+      DOWNLOAD_DIR: /downloads
+    volumes:
+      - portal-data:/data
+      - ${DOWNLOADS_HOST_DIR:-./downloads}:/downloads:ro
+    networks: [traefik, everlake]
+
+networks:
+  traefik:
+    name: ${TRAEFIK_NETWORK}
+    external: true
+  # The Everlake server's network, where its MySQL is reachable as "mysql" (docker network ls).
+  everlake:
+    name: ${EVERLAKE_NETWORK:-everlake_everlake}
+    external: true
+
+volumes:
+  portal-data:

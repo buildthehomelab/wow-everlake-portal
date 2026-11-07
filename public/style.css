@@ -1,0 +1,154 @@
+/* After the Forever class banners: a flat dark field, one strong colour per visit, and one blazing cel-shaded
+   burst of magic. Everything else is plain and flat, with ink lines, no shadows, gloss or blur. */
+:root {
+  --ink: #0a0912;
+  --text: #f2f0f7;
+  --muted: rgba(242, 240, 247, .66);
+  --field: rgba(0, 0, 0, .28);
+  --ok: #9ff0a8;
+  --error: #ffab9b;
+  color-scheme: dark;
+}
+
+/* A school of magic: field colour, then four cel steps from the dark rim to the white core, and the bloom. */
+[data-school="fel"]    { --bg: #0e1024; --c0: #24135e; --c1: #4b3cf0; --c2: #8f9bff; --c3: #eef0ff; --bloom: rgba(90, 80, 255, .38); }
+[data-school="fire"]   { --bg: #130d17; --c0: #6e1408; --c1: #f0531c; --c2: #ffb53b; --c3: #fff4d6; --bloom: rgba(255, 110, 40, .32); }
+[data-school="holy"]   { --bg: #43303a; --c0: #8b4a0e; --c1: #f29b2e; --c2: #ffd970; --c3: #fffbe9; --bloom: rgba(255, 190, 90, .36); }
+[data-school="nature"] { --bg: #3a2732; --c0: #165a2c; --c1: #3fbf5c; --c2: #a9f08a; --c3: #f3ffe4; --bloom: rgba(110, 230, 120, .3); }
+[data-school="frost"]  { --bg: #0b1526; --c0: #0f3a78; --c1: #2f8cf2; --c2: #9fdcff; --c3: #f1fbff; --bloom: rgba(80, 170, 255, .34); }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  align-items: center;
+  justify-items: start;
+  padding: 32px clamp(16px, 9vw, 160px);
+  overflow-x: hidden;
+  background: radial-gradient(ellipse 70% 90% at 80% 50%, color-mix(in srgb, var(--bg), white 6%), var(--bg) 70%);
+  background-color: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* ---------------------------------------------------------------- the burst */
+
+.spell {
+  position: fixed;
+  right: -8vw;
+  top: 50%;
+  width: min(108vh, 66vw);
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 0;
+}
+.spell::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  background: radial-gradient(circle at 50% 58%, var(--bloom), transparent 58%);
+}
+.spell svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+.spell .frame { display: none; }
+.spell .frame.on { display: inline; }
+.spell .halo { fill: var(--c1); opacity: .85; }
+.spell .k1 { fill: var(--c1); }
+.spell .k2 { fill: var(--c2); }
+.spell .k3 { fill: var(--c3); }
+
+/* ---------------------------------------------------------------- the content */
+
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 380px;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font: 800 64px/1 "Avenir Next Condensed", "Bahnschrift SemiCondensed", "Arial Narrow", system-ui, sans-serif;
+  font-stretch: condensed;
+  letter-spacing: -.01em;
+  color: var(--text);
+}
+
+h2 {
+  margin: 30px 0 10px;
+  font: 700 20px/1.3 "Avenir Next Condensed", "Bahnschrift SemiCondensed", system-ui, sans-serif;
+  color: var(--c2);
+}
+
+.lead { color: var(--muted); margin: 0 0 24px; }
+.who { color: var(--muted); margin: 0; }
+.small { font-size: 14px; color: var(--muted); }
+.hint { font-size: 13px; color: var(--muted); }
+
+.stack { display: grid; gap: 14px; margin-top: 22px; }
+label { display: grid; gap: 4px; font-size: 14px; }
+
+input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 3px;
+  border: 2px solid rgba(255, 255, 255, .1);
+  background: var(--field);
+  color: var(--text);
+  font: inherit;
+}
+input:focus { outline: none; border-color: var(--c2); }
+
+button, .button {
+  display: inline-block;
+  width: 100%;
+  padding: 11px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: var(--c1);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+button:hover, .button:hover { background: var(--c2); }
+button:focus-visible, .button:focus-visible, a:focus-visible { outline: 2px solid var(--c3); outline-offset: 3px; }
+.button.disabled { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .12); color: var(--muted); cursor: default; }
+
+button.link {
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--c2);
+  font-weight: 400;
+  font-size: 14px;
+}
+a { color: var(--c2); }
+
+.flash { padding: 10px 12px; border-radius: 3px; font-size: 14px; margin: 0 0 16px; background: var(--field); }
+.flash.ok { color: var(--ok); }
+.flash.error { color: var(--error); }
+
+.dl p { margin: 8px 0 0; }
+.unsupported p { margin: 0 0 6px; }
+
+.codes { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+.codes li { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.codes code { font-size: 15px; letter-spacing: .05em; color: var(--c3); }
+.state { font-size: 13px; color: var(--muted); }
+.state.used { color: var(--ok); }
+form.inline { display: inline; }
+
+.signout { margin-top: 28px; }
+[hidden] { display: none !important; }
+
+/* Phones and narrow windows: the burst rises behind the top of the page, the form below it. */
+@media (max-width: 760px) {
+  body { justify-items: center; align-items: start; padding-top: 30vh; }
+  .spell { right: 50%; top: -8vh; width: 110vw; transform: translateX(50%); }
+}
