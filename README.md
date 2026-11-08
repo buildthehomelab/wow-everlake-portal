@@ -119,6 +119,10 @@ TrueNAS app, `docker compose build` and **Restart** the app. Follow the fetch wi
 everlake-launcher install --dir <folder> --cdn <server>:8088
 ```
 
+**Outside the house.** With `CDN_PUBLIC=true` in `.env` it is also served on the portal's own name under `/tpr/`
+(the CDN's paths), beside the portal and through the same Traefik route, so the Cloudflare tunnel carries it with
+no new name or port. Players then use `--cdn https://PORTAL_HOST`. At home the name goes straight to Traefik.
+
 It never forces writes to disk, so the first fetch doesn't stall a database on the same disk. On ZFS, a dataset of
 its own for `./cdn` with `recordsize=1M` and `compression=off` suits it (the files are already compressed).
 

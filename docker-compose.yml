@@ -46,6 +46,18 @@ services:
     volumes:
       - ${CDN_STORE_DIR:-./cdn}:/store
       - ${CDN_OVERLAY_DIR:-./cdn-overlay}:/overlay:ro
+    # With CDN_PUBLIC=true it is also served on the portal's own name under /tpr/ (the CDN paths), next to the
+    # portal: through the Cloudflare tunnel from outside, straight to Traefik at home. Launchers then use
+    # --cdn https://PORTAL_HOST. The longer rule wins over the portal's for those paths.
+    labels:
+      - "traefik.enable=${CDN_PUBLIC:-false}"
+      - "traefik.docker.network=${TRAEFIK_NETWORK}"
+      - "traefik.http.routers.everlake-cdn.rule=Host(`${PORTAL_HOST}`) && PathPrefix(`/tpr/`)"
+      - "traefik.http.routers.everlake-cdn.entrypoints=websecure"
+      - "traefik.http.routers.everlake-cdn.tls=true"
+      - "traefik.http.routers.everlake-cdn.tls.certresolver=letsencrypt"
+      - "traefik.http.services.everlake-cdn.loadbalancer.server.port=8087"
+    networks: [traefik]
 
 networks:
   traefik:
