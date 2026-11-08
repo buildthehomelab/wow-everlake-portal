@@ -3,6 +3,9 @@ name: everlake-portal
 services:
   portal:
     build: .
+    # Fixed names, so a plain "docker compose" run and a TrueNAS custom app (another project name) share the
+    # same image and the same data.
+    image: everlake-portal:latest
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -39,3 +42,4 @@ networks:
 
 volumes:
   portal-data:
+    name: everlake-portal_portal-data

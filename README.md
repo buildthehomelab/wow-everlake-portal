@@ -76,6 +76,24 @@ Needs the Everlake server's Docker stack on the same machine, and Traefik with a
 
    An invite link is `https://PORTAL_HOST/?code=XXXX-XXXX-XXXX`. The site's **copy link** button makes one.
 
+### As a TrueNAS app
+
+To start, stop and restart it from the TrueNAS Apps screen, make it a custom app that includes this folder's
+compose file. Do steps 1 to 3 above first.
+
+1. Build the image from a shell: `docker compose build`. If the portal already runs from a shell, stop it with
+   `docker compose down` (its data volume stays).
+2. **Apps → Discover Apps → ⋮ → Install via YAML**, name it `everlake-portal`, and paste:
+
+   ```yaml
+   include:
+     - /path/to/wow-everlake-portal/docker-compose.yml
+   ```
+
+3. Make invite codes with `docker exec -u www-data ix-everlake-portal-portal-1 php bin/invite.php ...`.
+
+To update: `git pull` and `docker compose build` in a shell, then **Restart** the app in the Apps screen.
+
 ## Try it locally
 
 PHP 8.3 or newer with `gmp` and `pdo_sqlite`. No server or Docker is needed:
