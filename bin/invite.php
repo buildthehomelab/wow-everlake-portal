@@ -6,7 +6,7 @@
  *   php bin/invite.php list                 every code, who made it and who used it
  *   php bin/invite.php revoke CODE          cancel an unused code
  *
- * In Docker: docker compose exec portal php bin/invite.php new 3 "first testers"
+ * In Docker: docker compose exec -u www-data portal php bin/invite.php new 3 "first testers"
  */
 
 declare(strict_types=1);
@@ -15,6 +15,19 @@ require_once __DIR__ . '/../src/app.php';
 
 if (PHP_SAPI !== 'cli') {
     exit(1);
+}
+
+// `docker compose exec` runs as root. A database file made by root is read-only for the web server (www-data),
+// and every sign-in then fails with HTTP 500. So hand the portal's files to www-data and carry on as that user.
+if (function_exists('posix_geteuid') && posix_geteuid() === 0 && ($www = posix_getpwnam('www-data'))) {
+    foreach (array_merge([data_dir()], glob(data_dir() . '/portal.sqlite*') ?: []) as $path) {
+        chown($path, $www['uid']);
+        chgrp($path, $www['gid']);
+    }
+    if (!posix_setgid($www['gid']) || !posix_setuid($www['uid'])) {
+        fwrite(STDERR, "Can't switch to www-data; run as: docker compose exec -u www-data portal php bin/invite.php ...\n");
+        exit(1);
+    }
 }
 
 $cmd = $argv[1] ?? '';
