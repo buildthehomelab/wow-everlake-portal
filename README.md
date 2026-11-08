@@ -70,8 +70,8 @@ Needs the Everlake server's Docker stack on the same machine, and Traefik with a
 5. **The first invite codes** (after that, players make their own):
 
    ```sh
-   docker compose exec portal php bin/invite.php new 3 "first players"
-   docker compose exec portal php bin/invite.php list
+   docker compose exec -u www-data portal php bin/invite.php new 3 "first players"
+   docker compose exec -u www-data portal php bin/invite.php list
    ```
 
    An invite link is `https://PORTAL_HOST/?code=XXXX-XXXX-XXXX`. The site's **copy link** button makes one.
