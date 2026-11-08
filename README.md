@@ -8,7 +8,8 @@ The website for [Project Everlake](https://github.com/buildthehomelab/wow-projec
 - **Download the launcher**, once signed in. The page picks the build for the visitor's computer: Windows, or a Mac
   with Apple silicon. Intel Macs, Linux and phones get a "not supported" note. The launcher then downloads the game.
 
-It's a few plain PHP files with no framework and no dependencies.
+It's a few plain PHP files with no framework and no dependencies. Beside it runs **Everlake's own CDN** (the `cdn`
+service, see [below](#the-cdn)), which the launcher downloads the game from when Blizzard's CDN is down or slow.
 
 The look follows the cel-shaded style of WoW Forever's class art, drawn in code with no game art: a flat field in
 one colour per visit (fel, fire, holy, nature or frost; add `?school=fire` to pick one) and a glowing fireball that
@@ -75,6 +76,31 @@ Needs the Everlake server's Docker stack on the same machine, and Traefik with a
    ```
 
    An invite link is `https://PORTAL_HOST/?code=XXXX-XXXX-XXXX`. The site's **copy link** button makes one.
+
+## The CDN
+
+The `cdn` service is the launcher's `mirror` command, built from
+[wow-everlake-launcher](https://github.com/buildthehomelab/wow-everlake-launcher) (design:
+`docs/cdn-and-peers.md` there). It answers like Blizzard's CDN. Everything it fetches from Blizzard is checked
+against its hash and kept in `./cdn`, and on start it fetches the launcher's pinned build for Mac and Windows
+(enUS, about 89 GB) in the background, at most `CDN_RATE_MB` MB/s. A stopped fetch picks up where it left off.
+Our own patched builds in `./cdn-overlay` (wow-project-everlake's `cdn-build` output) are served first.
+
+Before the first start, make its folders, owned by the user it runs as (`CDN_UID`, default 950):
+
+```sh
+mkdir -p cdn cdn-overlay && chown 950:950 cdn cdn-overlay
+```
+
+Then `docker compose up -d --build` starts it with the portal, on port `CDN_PORT` (8088). Follow the fetch with
+`docker compose logs -f cdn`. A launcher uses it first, with Blizzard after it:
+
+```sh
+everlake-launcher install --dir <folder> --cdn <server>:8088
+```
+
+It never forces writes to disk, so the first fetch doesn't stall a database on the same disk. On ZFS, a dataset of
+its own for `./cdn` with `recordsize=1M` and `compression=off` suits it (the files are already compressed).
 
 ## Try it locally
 

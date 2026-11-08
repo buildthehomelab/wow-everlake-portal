@@ -28,6 +28,21 @@ services:
       - ${DOWNLOADS_HOST_DIR:-./downloads}:/downloads:ro
     networks: [traefik, everlake]
 
+  # Everlake's own CDN (the launcher's `mirror` command, github.com/buildthehomelab/wow-everlake-launcher): answers
+  # like Blizzard's CDN, keeps a checked copy of everything in ./cdn, and fetches the pinned build ahead of time, so
+  # installs work when Blizzard's CDN is down or slow. Launchers use it with --cdn <server>:CDN_PORT.
+  cdn:
+    build: https://github.com/buildthehomelab/wow-everlake-launcher.git#${CDN_LAUNCHER_REF:-main}
+    restart: unless-stopped
+    user: "${CDN_UID:-950}:${CDN_GID:-950}"
+    command: ["mirror", "--store", "/store", "--overlay", "/overlay", "--addr", ":8087", "--prefetch",
+              "--rate-mb", "${CDN_RATE_MB:-40}", "--quiet"]
+    ports:
+      - "${CDN_PORT:-8088}:8087"
+    volumes:
+      - ${CDN_STORE_DIR:-./cdn}:/store
+      - ${CDN_OVERLAY_DIR:-./cdn-overlay}:/overlay:ro
+
 networks:
   traefik:
     name: ${TRAEFIK_NETWORK}
