@@ -46,6 +46,16 @@ services:
     volumes:
       - ${CDN_STORE_DIR:-./cdn}:/store
       - ${CDN_OVERLAY_DIR:-./cdn-overlay}:/overlay:ro
+    # A public name for it (CDN_HOST), over plain HTTP on Traefik's port-80 entrypoint: the launcher and the game
+    # both fetch CDN files over http on port 80. Point a DNS-only record at the server; not through Cloudflare's
+    # proxy, which isn't meant for tens of GB of game files.
+    labels:
+      - "traefik.enable=${CDN_TRAEFIK:-false}"
+      - "traefik.docker.network=${TRAEFIK_NETWORK}"
+      - "traefik.http.routers.everlake-cdn.rule=Host(`${CDN_HOST:-cdn.invalid}`)"
+      - "traefik.http.routers.everlake-cdn.entrypoints=${CDN_ENTRYPOINT:-web}"
+      - "traefik.http.services.everlake-cdn.loadbalancer.server.port=8087"
+    networks: [traefik]
 
 networks:
   traefik:

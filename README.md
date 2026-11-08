@@ -119,6 +119,12 @@ TrueNAS app, `docker compose build` and **Restart** the app. Follow the fetch wi
 everlake-launcher install --dir <folder> --cdn <server>:8088
 ```
 
+**A public name.** Set `CDN_TRAEFIK=true` and `CDN_HOST` in `.env`, then rebuild or restart. Traefik then sends
+plain HTTP for that name on its port-80 entrypoint (`CDN_ENTRYPOINT`, default `web`) to the mirror. Give the name a
+DNS-only record (not proxied through Cloudflare) pointing at the server, and forward port 80 to Traefik. Players
+then use `--cdn <name>`, and later the game streams from it too. The entrypoint must not redirect everything to
+HTTPS: the game fetches CDN files over plain HTTP.
+
 It never forces writes to disk, so the first fetch doesn't stall a database on the same disk. On ZFS, a dataset of
 its own for `./cdn` with `recordsize=1M` and `compression=off` suits it (the files are already compressed).
 
