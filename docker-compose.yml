@@ -3,6 +3,9 @@ name: everlake-portal
 services:
   portal:
     build: .
+    # Fixed names, so a plain "docker compose" run and a TrueNAS custom app (another project name) share the
+    # same image and the same data.
+    image: everlake-portal:latest
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -33,6 +36,7 @@ services:
   # installs work when Blizzard's CDN is down or slow. Launchers use it with --cdn <server>:CDN_PORT.
   cdn:
     build: https://github.com/buildthehomelab/wow-everlake-launcher.git#${CDN_LAUNCHER_REF:-main}
+    image: everlake-mirror:latest # a fixed name, like the portal's, for the TrueNAS app
     restart: unless-stopped
     user: "${CDN_UID:-950}:${CDN_GID:-950}"
     command: ["mirror", "--store", "/store", "--overlay", "/overlay", "--addr", ":8087", "--prefetch",
@@ -54,3 +58,4 @@ networks:
 
 volumes:
   portal-data:
+    name: everlake-portal_portal-data

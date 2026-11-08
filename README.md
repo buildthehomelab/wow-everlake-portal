@@ -77,6 +77,25 @@ Needs the Everlake server's Docker stack on the same machine, and Traefik with a
 
    An invite link is `https://PORTAL_HOST/?code=XXXX-XXXX-XXXX`. The site's **copy link** button makes one.
 
+### As a TrueNAS app
+
+To start, stop and restart it from the TrueNAS Apps screen, make it a custom app that includes this folder's
+compose file. Do steps 1 to 3 above first.
+
+1. Build the images from a shell: `docker compose build` (the portal's and the [CDN](#the-cdn)'s; make the CDN's
+   folders before the app starts). If the portal already runs from a shell, stop it with `docker compose down`
+   (its data volume stays).
+2. **Apps → Discover Apps → ⋮ → Install via YAML**, name it `everlake-portal`, and paste:
+
+   ```yaml
+   include:
+     - /path/to/wow-everlake-portal/docker-compose.yml
+   ```
+
+3. Make invite codes with `docker exec -u www-data ix-everlake-portal-portal-1 php bin/invite.php ...`.
+
+To update: `git pull` and `docker compose build` in a shell, then **Restart** the app in the Apps screen.
+
 ## The CDN
 
 The `cdn` service is the launcher's `mirror` command, built from
@@ -92,8 +111,9 @@ Before the first start, make its folders, owned by the user it runs as (`CDN_UID
 mkdir -p cdn cdn-overlay && chown 950:950 cdn cdn-overlay
 ```
 
-Then `docker compose up -d --build` starts it with the portal, on port `CDN_PORT` (8088). Follow the fetch with
-`docker compose logs -f cdn`. A launcher uses it first, with Blizzard after it:
+Then it starts with the portal, on port `CDN_PORT` (8088): `docker compose up -d --build` from a shell, or, for the
+TrueNAS app, `docker compose build` and **Restart** the app. Follow the fetch with `docker compose logs -f cdn`
+(`docker logs -f ix-everlake-portal-cdn-1` for the app). A launcher uses it first, with Blizzard after it:
 
 ```sh
 everlake-launcher install --dir <folder> --cdn <server>:8088
