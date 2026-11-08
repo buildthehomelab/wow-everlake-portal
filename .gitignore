@@ -1,6 +1,8 @@
 .env
 docker/create-db-user.sql
 downloads/
+cdn/
+cdn-overlay/
 dev/
 .DS_Store
 .claude/
